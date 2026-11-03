@@ -55,7 +55,6 @@
     /* Circle: slow, steady clockwise turn around its own centre */
     .ring {
       transform-origin: 1620px 256.7px;
-      animation: spin 25s linear infinite;
     }
 
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -272,25 +271,49 @@
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       var art = document.querySelector(".art");
       var segs = art.querySelectorAll(".seg");
-      var FILL = 9000;   // time to fill the whole bar (ms)
-      var HOLD = 1800;   // pause when full
+      var STEP = 375;    // time between pieces while loading (ms)
+      var BLINK = 450;   // how long the last piece stays on, then off (ms)
+      var BLINKS = 3;    // how many times it blinks before the bar resets
       var REST = 900;    // pause with the bar empty before the next round
 
-      // every piece appears at the same steady pace, from the first to the last
-      function ease(p) { return p; }
-
+      var ring = art.querySelector(".ring");
       art.classList.add("loading");
 
       function run() {
-        segs.forEach(function (s, i) {
-          var at = ease(i / (segs.length - 1)) * FILL;
-          setTimeout(function () { s.classList.add("on"); }, at);
-        });
-        setTimeout(function () {
-          segs.forEach(function (s) { s.classList.remove("on"); });
-          setTimeout(run, REST);
-        }, FILL + HOLD);
+        // stop at 85% of the bar
+        var stop = Math.round(segs.length * 0.85);
+        var n = 0;
+
+        // the circle makes exactly one clockwise turn from the start of loading
+        // until the moment the bar resets
+        var turn = stop * STEP + BLINK * (2 * BLINKS + 1);
+        ring.style.animation = "none";
+        void ring.getBoundingClientRect();   // restart the animation cleanly
+        ring.style.animation = "spin " + turn + "ms linear";
+
+        (function fill() {
+          segs[n].classList.add("on");
+          n++;
+          if (n < stop) setTimeout(fill, STEP);
+          else setTimeout(function () { blink(segs[stop - 1], BLINKS); }, STEP);
+        })();
       }
+
+      // the last piece switches off and on without progressing
+      function blink(seg, times) {
+        seg.classList.remove("on");
+        setTimeout(function () {
+          seg.classList.add("on");
+          if (times > 1) setTimeout(function () { blink(seg, times - 1); }, BLINK);
+          else setTimeout(reset, BLINK * 2);
+        }, BLINK);
+      }
+
+      function reset() {
+        segs.forEach(function (s) { s.classList.remove("on"); });
+        setTimeout(run, REST);
+      }
+
       setTimeout(run, 800);
     })();
   </script>
