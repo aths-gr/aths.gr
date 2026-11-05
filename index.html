@@ -138,6 +138,27 @@
     .contact:hover { text-decoration: underline; text-underline-offset: 3px; }
     .contact:focus-visible { outline: 1px solid #fff; outline-offset: 4px; }
 
+    /* Texture, in two layers over the whole page:
+       1. inverted texture, multiplied: gives every white element a printed, worn look
+          (multiplying over black leaves black unchanged)
+       2. original texture, lighten: shows the texture on the black background only,
+          because the white elements are always lighter than it */
+    .texture {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background: url("texture.jpg") center / cover no-repeat;
+    }
+    .texture-ink {
+      z-index: 10;
+      filter: invert(1);
+      mix-blend-mode: multiply;
+    }
+    .texture-bg {
+      z-index: 11;
+      mix-blend-mode: lighten;
+    }
+
     @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
 
     @media (prefers-reduced-motion: reduce) {
@@ -273,6 +294,8 @@
     <span class="copy">GCR 196767301000 | VAT EL803431065</span>
     <span class="copy">© 2026 ATHS SMPC</span>
   </footer>
+  <div class="texture texture-ink" aria-hidden="true"></div>
+  <div class="texture texture-bg" aria-hidden="true"></div>
   <script>
     (function () {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
