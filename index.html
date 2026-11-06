@@ -147,7 +147,11 @@
       position: fixed;
       inset: 0;
       pointer-events: none;
-      background: url("texture.jpg") center / cover no-repeat;
+      background: url("texture-desktop.jpg") center / cover no-repeat;
+    }
+    /* phones and other tall screens get the portrait texture */
+    @media (orientation: portrait) {
+      .texture { background-image: url("texture-mobile.jpg"); }
     }
     .texture-ink {
       z-index: 10;
